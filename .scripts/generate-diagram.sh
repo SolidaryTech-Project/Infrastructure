@@ -9,8 +9,8 @@ OUTPUT_DIR="./docs/images"
 mkdir -p "$OUTPUT_DIR"
 
 # Cada alvo: caminho do diretório Terraform => sufixo que vai no nome do PNG
+# (Bootstrap fora de propósito: é só o bucket de state, não rende diagrama)
 declare -A TARGETS=(
-    ["Bootstrap"]="bootstrap"
     ["Environments/Development"]="dev"
     ["Environments/Staging"]="stg"
     ["Environments/Production"]="prd"
