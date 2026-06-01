@@ -1,11 +1,14 @@
 #Install Local Dependencies
-install-local:
+pre-commit:
 #Pre-commit - Inframap - Graphviz (to generate the diagrams)
 	sudo apt update
 	sudo apt upgrade -y
 	sudo apt install -y pre-commit
 	sudo apt install -y graphviz
 	go install github.com/cycloidio/inframap@v0.8.0
+#Move o inframap para o PATH global (go install joga em ~/go/bin, que costuma ficar fora do PATH)
+	sudo cp "$$(go env GOPATH)/bin/inframap" /usr/local/bin/
+	inframap version
 #If is your first time using pre-commit, you need to run the command below to install the hooks
 	pre-commit install
 #Install terraform-docs (to generate the documentation)
