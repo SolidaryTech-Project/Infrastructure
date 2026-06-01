@@ -8,41 +8,46 @@ OUTPUT_DIR="./docs/images"
 # Garante que a pasta para salvar a imagem exista
 mkdir -p "$OUTPUT_DIR"
 
-# Meus ambientes e o sufixo que vai no nome do arquivo de cada um
-ENVIRONMENTS=("Development" "Staging" "Production")
-declare -A SUFFIX=( ["Development"]="dev" ["Staging"]="stg" ["Production"]="prd" )
+# Cada alvo: caminho do diretório Terraform => sufixo que vai no nome do PNG
+declare -A TARGETS=(
+    ["Bootstrap"]="bootstrap"
+    ["Environments/Development"]="dev"
+    ["Environments/Staging"]="stg"
+    ["Environments/Production"]="prd"
+)
 
 # Pego só o que está no stage do commit (adicionado/modificado/renomeado)
-# pra descobrir quais ambientes preciso de fato regerar
+# pra descobrir quais alvos preciso de fato regerar
 CHANGED=$(git diff --cached --name-only --diff-filter=ACMR || true)
 
 gerar_diagrama() {
-    local env="$1"
-    local out="$OUTPUT_DIR/arquitetura-aws-${SUFFIX[$env]}.png"
+    local dir="$1"
+    local suffix="$2"
+    local out="$OUTPUT_DIR/arquitetura-aws-${suffix}.png"
 
-    # Só baixo os módulos se ainda não tiver feito init nesse ambiente.
+    # Só baixo os módulos se ainda não tiver feito init nesse diretório.
     # Se eu mexer em módulo, basta apagar a .terraform/ que ele baixa de novo.
-    if [ ! -d "$env/.terraform" ]; then
-        echo "📥 [$env] Baixando módulos remotos (Terraform Init)..."
+    if [ ! -d "$dir/.terraform" ]; then
+        echo "📥 [$dir] Baixando módulos remotos (Terraform Init)..."
         # O -backend=false garante que ele NÃO mude nada no meu estado (S3/DynamoDB) remoto, só baixa o código
-        terraform -chdir="$env" init -backend=false -get=true -input=false > /dev/null
+        terraform -chdir="$dir" init -backend=false -get=true -input=false > /dev/null
     fi
 
-    echo "📊 [$env] Gerando/Atualizando diagrama com Inframap..."
+    echo "📊 [$dir] Gerando/Atualizando diagrama com Inframap..."
     # Gera o mapa e joga para o Graphviz (dot) cuspir o PNG
-    inframap generate "$env" --connections | dot -Tpng -o "$out"
+    inframap generate "$dir" --connections | dot -Tpng -o "$out"
 
     # Adiciona o novo desenho ao commit atual
     git add "$out"
-    echo "✅ [$env] Diagrama atualizado em $out"
+    echo "✅ [$dir] Diagrama atualizado em $out"
 }
 
-# Roda em paralelo só os ambientes que tiveram .tf no stage
+# Roda em paralelo só os alvos que tiveram .tf no stage
 # (commit que não toca em terraform não paga o custo)
 PIDS=()
-for env in "${ENVIRONMENTS[@]}"; do
-    if echo "$CHANGED" | grep -q "^$env/.*\.tf$"; then
-        gerar_diagrama "$env" &
+for dir in "${!TARGETS[@]}"; do
+    if echo "$CHANGED" | grep -qE "^${dir}/.*\.tf$"; then
+        gerar_diagrama "$dir" "${TARGETS[$dir]}" &
         PIDS+=($!)
     fi
 done
