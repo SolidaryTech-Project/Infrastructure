@@ -9,10 +9,6 @@ install-local:
 #If is your first time using pre-commit, you need to run the command below to install the hooks
 	pre-commit install
 #Install terraform-docs (to generate the documentation)
-	curl -sSLo terraform-docs.tar.gz https://terraform-docs.io/dl/v0.18.0/terraform-docs-v0.18.0-$(uname)-amd64.tar.gz
-	tar -xzf terraform-docs.tar.gz terraform-docs
-	sudo mv terraform-docs /usr/local/bin/
-#Install terraform-docs (to generate the documentation)
 	curl -sSLo terraform-docs.tar.gz https://terraform-docs.io/dl/v0.18.0/terraform-docs-v0.18.0-linux-amd64.tar.gz
 	tar -xzf terraform-docs.tar.gz terraform-docs
 	chmod +x terraform-docs
