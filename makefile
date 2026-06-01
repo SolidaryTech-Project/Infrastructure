@@ -12,3 +12,9 @@ install-local:
 	curl -sSLo terraform-docs.tar.gz https://terraform-docs.io/dl/v0.18.0/terraform-docs-v0.18.0-$(uname)-amd64.tar.gz
 	tar -xzf terraform-docs.tar.gz terraform-docs
 	sudo mv terraform-docs /usr/local/bin/
+#Install terraform-docs (to generate the documentation)
+	curl -sSLo terraform-docs.tar.gz https://terraform-docs.io/dl/v0.18.0/terraform-docs-v0.18.0-linux-amd64.tar.gz
+	tar -xzf terraform-docs.tar.gz terraform-docs
+	chmod +x terraform-docs
+	sudo mv terraform-docs /usr/local/bin/
+	terraform-docs --version
