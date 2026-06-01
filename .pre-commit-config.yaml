@@ -12,6 +12,11 @@ repos:
     rev: v1.86.0
     hooks:
       - id: terraform_fmt #Identação do código
+      - id: terraform_docs #Gera/atualiza README.md a partir dos .tf
+        args:
+          - --hook-config=--path-to-file=README.md
+          - --hook-config=--add-to-existing-file=true
+          - --hook-config=--create-file-if-not-exist=true
 
   # 3. Gatilho personalizado para o Inframap
   - repo: local
