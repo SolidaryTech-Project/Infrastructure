@@ -1,0 +1,24 @@
+repos:
+  # 1. Validações básicas de arquivos (evita commits com lixo)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+
+  # 2. Validações automáticas de Terraform (Formatação)
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.86.0
+    hooks:
+      - id: terraform_fmt #Identação do código
+
+  # 3. O seu gatilho personalizado para o Inframap
+  - repo: local
+    hooks:
+      - id: generate-inframap
+        name: Executar Inframap e Gerar Grafico
+        entry: .scripts/generate-diagram.sh
+        language: script
+        files: '\.tf$' # Só vai rodar se você tiver alterado algum arquivo .tf
+        pass_filenames: false
