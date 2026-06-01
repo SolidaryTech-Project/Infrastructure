@@ -13,12 +13,12 @@ repos:
     hooks:
       - id: terraform_fmt #Identação do código
 
-  # 3. O seu gatilho personalizado para o Inframap
+  # 3. Gatilho personalizado para o Inframap
   - repo: local
     hooks:
       - id: generate-inframap
         name: Executar Inframap e Gerar Grafico
         entry: .scripts/generate-diagram.sh
         language: script
-        files: '\.tf$' # Só vai rodar se você tiver alterado algum arquivo .tf
+        files: '\.tf$' # Só vai rodar se tiver alterado algum arquivo .tf
         pass_filenames: false
