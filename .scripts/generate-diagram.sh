@@ -17,27 +17,39 @@ gerar_diagrama() {
     local dir="$1"
     local suffix="$2"
     local out="$OUTPUT_DIR/arquitetura-aws-${suffix}.png"
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
 
-    # Checa módulos especificamente — .terraform pode existir sem os módulos baixados
-    if [ ! -d "$dir/.terraform/modules" ]; then
+    # Garante limpeza do tmp mesmo em caso de erro
+    trap "rm -rf '$tmp_dir'" RETURN
+
+    # Copia os .tf sem o backend.tf — graph não precisa de estado remoto
+    find "$dir" -maxdepth 1 -name "*.tf" ! -name "backend.tf" -exec cp {} "$tmp_dir/" \;
+
+    # Reutiliza providers e módulos já baixados para não re-baixar tudo
+    if [ -d "$dir/.terraform" ]; then
+        cp -r "$dir/.terraform" "$tmp_dir/"
+    fi
+    [ -f "$dir/.terraform.lock.hcl" ] && cp "$dir/.terraform.lock.hcl" "$tmp_dir/"
+
+    # Baixa módulos apenas se ainda não tiver
+    if [ ! -d "$tmp_dir/.terraform/modules" ]; then
         echo "📥 [$dir] Baixando módulos (terraform init)..."
-        terraform -chdir="$dir" init -backend=false -get=true -input=false
+        terraform -chdir="$tmp_dir" init -backend=false -get=true -input=false
     fi
 
-    echo "📊 [$dir] Gerando diagrama com Inframap..."
-
+    echo "📊 [$dir] Gerando diagrama (terraform graph)..."
     local dot_src
-    dot_src=$(inframap generate "$dir" --connections 2>&1)
+    dot_src=$(terraform -chdir="$tmp_dir" graph 2>&1)
 
-    # Inframap retornou grafo vazio — evita gerar PNG em branco
-    if [ -z "$dot_src" ] || echo "$dot_src" | grep -qE "^digraph \{[[:space:]]*\}$"; then
-        echo "⚠️  [$dir] Inframap não encontrou recursos para mapear. Diagrama ignorado."
-        echo "   Output do inframap: $dot_src"
+    if echo "$dot_src" | grep -q "^╷"; then
+        echo "❌ [$dir] Erro no terraform graph:"
+        echo "$dot_src"
         return 1
     fi
 
     echo "$dot_src" | dot -Tpng -o "$out"
-    echo "✅ [$dir] Diagrama atualizado em $out"
+    echo "✅ [$dir] Diagrama salvo em $out"
 }
 
 PIDS=()
