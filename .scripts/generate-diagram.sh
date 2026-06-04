@@ -30,7 +30,7 @@ gerar_diagrama() {
     if [ ! -d "$dir/.terraform" ]; then
         echo "📥 [$dir] Baixando módulos remotos (Terraform Init)..."
         # O -backend=false garante que ele NÃO mude nada no meu estado (S3/DynamoDB) remoto, só baixa o código
-        terraform -chdir="$dir" init -backend=false -get=true -input=false > /dev/null
+        terraform -chdir="$dir" init -backend=false -get=true -input=false
     fi
 
     echo "📊 [$dir] Gerando/Atualizando diagrama com Inframap..."
