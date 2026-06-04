@@ -1,5 +1,5 @@
 module "network" {
-  source = "git::https://github.com/org/terraform-modules.git//Modules/Network?ref=v1.0.0"
+  source = "git::https://github.com/SolidaryTech-Project/Terraform-Modules.git//Modules/Network?ref=v1.0.0"
 
   cidr_block       = var.cidr_block
   name             = "${var.project_name}-${var.environment}"

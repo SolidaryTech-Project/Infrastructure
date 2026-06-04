@@ -21,7 +21,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_network"></a> [network](#module\_network) | git::https://github.com/org/terraform-modules.git//Modules/Network | v1.0.0 |
+| <a name="module_network"></a> [network](#module\_network) | git::https://github.com/SolidaryTech-Project/Terraform-Modules.git//Modules/Network | v1.0.0 |
 
 ## Resources
 
