@@ -6,7 +6,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "terraform-state-solidary-tech"
+  bucket = "terraform-state-solidary-tech-backend"
 }
 
 #-----------------------------

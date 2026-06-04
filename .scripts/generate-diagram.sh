@@ -37,17 +37,18 @@ gerar_diagrama() {
     # Gera o mapa e joga para o Graphviz (dot) cuspir o PNG
     inframap generate "$dir" --connections | dot -Tpng -o "$out"
 
-    # Adiciona o novo desenho ao commit atual
-    git add "$out"
     echo "✅ [$dir] Diagrama atualizado em $out"
 }
 
 # Roda em paralelo só os alvos que tiveram .tf no stage
 # (commit que não toca em terraform não paga o custo)
 PIDS=()
+OUTS=()
 for dir in "${!TARGETS[@]}"; do
     if echo "$CHANGED" | grep -qE "^${dir}/.*\.tf$"; then
-        gerar_diagrama "$dir" "${TARGETS[$dir]}" &
+        suffix="${TARGETS[$dir]}"
+        OUTS+=("$OUTPUT_DIR/arquitetura-aws-${suffix}.png")
+        gerar_diagrama "$dir" "$suffix" &
         PIDS+=($!)
     fi
 done
@@ -63,4 +64,10 @@ FAIL=0
 for pid in "${PIDS[@]}"; do
     wait "$pid" || FAIL=1
 done
+
+# git add único depois de todos os jobs terminarem (evita race condition no index.lock)
+if [ $FAIL -eq 0 ]; then
+    git add "${OUTS[@]}"
+fi
+
 exit $FAIL
