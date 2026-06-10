@@ -19,7 +19,7 @@ on:
       environment:
         description: "Environment to apply Terraform (Development || Staging || Production)"
         required: true
-        type: stringF
+        type: string
 
 env:
   TF_VERSION: ${{ vars.TF_VERSION }}
