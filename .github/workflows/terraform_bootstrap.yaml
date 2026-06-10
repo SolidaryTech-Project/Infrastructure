@@ -43,7 +43,7 @@ jobs:
             echo "Bucket existente. Pulando bootstrap."
           else
             echo "Bucket não existe. Criando backend..."
-            cd bootstrap
+            cd Bootstrap
             terraform init
             terraform apply -auto-approve
             cd ..
