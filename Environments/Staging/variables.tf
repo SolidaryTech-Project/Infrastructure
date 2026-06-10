@@ -33,7 +33,7 @@ variable "db_name" {
 variable "instance_types" {
   type        = list(string)
   description = "EC2 instance types for the EKS node group"
-  default     = ["t3.small"]
+  default     = ["t3.medium"]
 }
 
 variable "desired_size" {

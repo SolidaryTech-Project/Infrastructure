@@ -74,6 +74,10 @@ module "databases" {
   rds_username       = var.rds_username
   db_name            = var.db_name
 
+  # Production: instância maior e mais armazenamento
+  rds_instance_class    = "db.t3.medium"
+  rds_allocated_storage = 50
+
   # DynamoDB for volunteer-service
   dynamodb_hash_key = "volunteer_id"
   dynamodb_attributes = [

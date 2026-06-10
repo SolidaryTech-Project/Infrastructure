@@ -17,3 +17,16 @@ pre-commit:
 	chmod +x terraform-docs
 	sudo mv terraform-docs /usr/local/bin/
 	terraform-docs --version
+#Install tflint (linter)
+	curl -sSLo tflint.zip https://github.com/terraform-linters/tflint/releases/latest/download/tflint_linux_amd64.zip
+	unzip -o tflint.zip tflint
+	chmod +x tflint
+	sudo mv tflint /usr/local/bin/
+	rm tflint.zip
+	tflint --version
+#Install trivy (security scanner)
+	curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+	trivy --version
+#Configure Terraform plugin cache (avoids re-downloading providers per module)
+	mkdir -p ~/.terraform.d/plugin-cache
+	grep -q "plugin_cache_dir" ~/.terraformrc 2>/dev/null || echo 'plugin_cache_dir = "~/.terraform.d/plugin-cache"' >> ~/.terraformrc

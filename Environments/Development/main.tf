@@ -33,6 +33,12 @@ provider "aws" {
 }
 
 locals {
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+    ManagedBy   = "terraform"
+  }
+
   eks_exec = {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"

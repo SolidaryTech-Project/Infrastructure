@@ -12,18 +12,14 @@ repos:
     rev: v1.86.0
     hooks:
       - id: terraform_fmt #Identação do código
+      - id: terraform_tflint #Linter de boas práticas e erros potenciais
+        args:
+          - --args=--disable-rule=terraform_module_pinned_source
+      - id: terraform_trivy #Análise estática de segurança
+        args:
+          - --args=--tf-exclude-downloaded-modules
       - id: terraform_docs #Gera/atualiza README.md a partir dos .tf
         args:
           - --hook-config=--path-to-file=README.md
           - --hook-config=--add-to-existing-file=true
           - --hook-config=--create-file-if-not-exist=true
-
-  # 3. Gatilho personalizado para o Inframap
-  - repo: local
-    hooks:
-      - id: generate-inframap
-        name: Executar Inframap e Gerar Grafico
-        entry: .scripts/generate-diagram.sh
-        language: script
-        files: '\.tf$' # Só vai rodar se tiver alterado algum arquivo .tf
-        pass_filenames: false

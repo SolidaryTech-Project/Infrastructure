@@ -1,4 +1,10 @@
-aws_region   = "us-east-1"
-project_name = "solidarytech"
-environment  = "development"
-cidr_block   = "10.0.0.0/16"
+aws_region     = "us-east-1"
+project_name   = "solidarytech"
+environment    = "development"
+cidr_block     = "10.0.0.0/16"
+rds_username   = "solidarytech"
+db_name        = "solidarytech"
+instance_types = ["t3.small"]
+desired_size   = 4
+min_size       = 4
+max_size       = 6

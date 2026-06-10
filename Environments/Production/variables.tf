@@ -33,13 +33,13 @@ variable "db_name" {
 variable "instance_types" {
   type        = list(string)
   description = "EC2 instance types for the EKS node group"
-  default     = ["t3.small"]
+  default     = ["t3.large"]
 }
 
 variable "desired_size" {
   type        = number
   description = "Desired number of worker nodes"
-  default     = 2
+  default     = 3
 }
 
 variable "min_size" {
@@ -51,5 +51,5 @@ variable "min_size" {
 variable "max_size" {
   type        = number
   description = "Maximum number of worker nodes"
-  default     = 4
+  default     = 6
 }
