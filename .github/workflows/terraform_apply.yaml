@@ -19,7 +19,7 @@ on:
       environment:
         description: "Environment to apply Terraform (Development || Staging || Production)"
         required: true
-        type: string
+        type: stringF
 
 env:
   TF_VERSION: ${{ vars.TF_VERSION }}
@@ -54,11 +54,11 @@ jobs:
         run: |
           ENV="${{ inputs.environment }}"
           if [ "$ENV" = "development" ]; then
-            echo "tf_dir=environments/Development" >> "$GITHUB_OUTPUT"
+            echo "tf_dir=Environments/Development" >> "$GITHUB_OUTPUT"
           elif [ "$ENV" = "staging" ]; then
-            echo "tf_dir=environments/Staging" >> "$GITHUB_OUTPUT"
+            echo "tf_dir=Environments/Staging" >> "$GITHUB_OUTPUT"
           else
-            echo "tf_dir=environments/Production" >> "$GITHUB_OUTPUT"
+            echo "tf_dir=Environments/Production" >> "$GITHUB_OUTPUT"
           fi
           echo "cluster=togglemaster-${ENV}-cluster" >> "$GITHUB_OUTPUT"
 
