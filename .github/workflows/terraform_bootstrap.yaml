@@ -136,6 +136,7 @@ jobs:
   Terraform-Init-Production:
     name: Terraform-Init-Production
     runs-on: ubuntu-latest
+    needs: Terraform-Init-Development Terraform-Init-Staging
     environment: Production
     env:
       WORK_DIR: Environments/Production/
