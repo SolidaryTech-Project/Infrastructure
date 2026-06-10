@@ -2,3 +2,75 @@ name: Terraform Apply
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to apply Terraform"
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      confirm:
+        description: "Type the environment name to confirm"
+        required: true
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to apply Terraform (Development || Staging || Production)"
+        required: true
+        type: string
+
+env:
+  TF_VERSION: ${{ vars.TF_VERSION }}
+
+jobs:
+  apply:
+    name: Apply ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validating the selected envrionemnt
+        run: |
+          if [ "${{ inputs.environment }}" != "development" ] && [ "${{ inputs.environment }}" != "staging" ] && [ "${{ inputs.environment }}" != "production" ]; then
+            echo "ERRO: O ambiente '${{ inputs.environment }}' é inválido. Escolha 'development' ou 'staging' ou 'production'."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: Togglemaster/Terraform
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Set Terraform directory
+        id: vars
+        run: |
+          ENV="${{ inputs.environment }}"
+          if [ "$ENV" = "development" ]; then
+            echo "tf_dir=environments/Development" >> "$GITHUB_OUTPUT"
+          elif [ "$ENV" = "staging" ]; then
+            echo "tf_dir=environments/Staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "tf_dir=environments/Production" >> "$GITHUB_OUTPUT"
+          fi
+          echo "cluster=togglemaster-${ENV}-cluster" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ vars.TF_VERSION }}
+
+      - name: Terraform Init
+        working-directory: ${{ steps.vars.outputs.tf_dir }}
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ${{ steps.vars.outputs.tf_dir }}
+        run: terraform apply -auto-approve
