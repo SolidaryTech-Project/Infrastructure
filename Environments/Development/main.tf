@@ -45,7 +45,7 @@ locals {
     args = [
       "eks",
       "get-token",
-      "--cluster-name", "${var.project_name}-${var.environment}-cluster",
+      "--cluster-name", module.eks.eks_cluster_name,
     ]
   }
 }
