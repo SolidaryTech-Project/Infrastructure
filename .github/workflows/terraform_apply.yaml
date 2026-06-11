@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to apply Terraform"
+        description: "Environment to destroy Apply"
         required: true
         type: choice
         options:
@@ -15,28 +15,14 @@ on:
         description: "Type the environment name to confirm"
         required: true
   workflow_call:
-    inputs:
-      environment:
-        description: "Environment to apply Terraform (Development || Staging || Production)"
-        required: true
-        type: string
-
-env:
-  TF_VERSION: ${{ vars.TF_VERSION }}
 
 jobs:
   apply:
-    name: Apply ${{ inputs.environment }}
+    name: Apply ${{ github.event.inputs.environment }}
     runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == github.event.inputs.environment
 
     steps:
-      - name: Validating the selected envrionemnt
-        run: |
-          if [ "${{ inputs.environment }}" != "development" ] && [ "${{ inputs.environment }}" != "staging" ] && [ "${{ inputs.environment }}" != "production" ]; then
-            echo "ERRO: O ambiente '${{ inputs.environment }}' é inválido. Escolha 'development' ou 'staging' ou 'production'."
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -58,7 +44,7 @@ jobs:
           else
             echo "tf_dir=Environments/Production" >> "$GITHUB_OUTPUT"
           fi
-          echo "cluster=togglemaster-${ENV}-cluster" >> "$GITHUB_OUTPUT"
+          echo "cluster=solidarytech-${ENV}-cluster" >> "$GITHUB_OUTPUT"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

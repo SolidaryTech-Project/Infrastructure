@@ -2,3 +2,86 @@ name: Terraform Destroy
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to destroy Terraform"
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      confirm:
+        description: "Type the environment name to confirm"
+        required: true
+  workflow_call:
+
+jobs:
+  destroy:
+    name: Destroy ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == github.event.inputs.environment
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Set Terraform directory
+        id: vars
+        run: |
+          ENV="${{ inputs.environment }}"
+          if [ "$ENV" = "development" ]; then
+            echo "tf_dir=Environments/Development" >> "$GITHUB_OUTPUT"
+          elif [ "$ENV" = "staging" ]; then
+            echo "tf_dir=Environments/Staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "tf_dir=Environments/Production" >> "$GITHUB_OUTPUT"
+          fi
+          echo "cluster=solidarytech-${ENV}-cluster" >> "$GITHUB_OUTPUT"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Configure kubeconfig
+        id: kubeconfig
+        continue-on-error: true
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ steps.vars.outputs.cluster }} \
+            --region ${{ vars.AWS_REGION }}
+
+      # ArgoCD reconcilia os recursos dos namespaces continuamente. Sem deletar
+      # as Applications antes, o destroy trava: NS marca Terminating, K8s deleta
+      # pods/svcs/deploys, ArgoCD recria, NS nunca esvazia. O finalizer
+      # resources-finalizer.argocd.argoproj.io cascateia o delete dos recursos
+      # gerenciados, então um único delete das Applications limpa tuuudo
+      - name: Deletar ArgoCD Applications
+        if: steps.kubeconfig.outcome == 'success'
+        continue-on-error: true
+        run: |
+          echo "==> Deletando todas as Applications do ArgoCD..."
+          kubectl delete applications --all -n argocd --timeout=300s --wait=true || true
+          echo "==> Aguardando ArgoCD finalizar a limpeza..."
+          sleep 30
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ vars.TF_VERSION }}
+
+      - name: Terraform Init
+        working-directory: ${{ steps.vars.outputs.tf_dir }}
+        run: terraform init
+
+      - name: Terraform Destroy
+        working-directory: ${{ steps.vars.outputs.tf_dir }}
+        run: terraform destroy -auto-approve

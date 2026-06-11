@@ -5,11 +5,6 @@ on:
   push:
     branches: [ main ]
 
-env:
-  AWS_REGION: us-east-1
-  TF_VERSION: 1.11.1
-  BUCKET_NAME: terraform-state-solidary-tech-backend
-
 jobs:
   Bootstrap:
     name: Terraform-Init
@@ -22,7 +17,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ env.TF_VERSION }}
+          terraform_version: ${{ vars.TF_VERSION }}
           terraform_wrapper: false
 
       - name: Configure AWS
@@ -30,16 +25,16 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Bootstrap backend if needed
         run: |
           set -euo pipefail
 
-          echo "BUCKET_NAME: $BUCKET_NAME"
+          echo "REMOTE_BACKEND: $REMOTE_BACKEND"
           echo "AWS_REGION: $AWS_REGION"
 
-          if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+          if aws s3api head-bucket --bucket "$REMOTE_BACKEND" 2>/dev/null; then
             echo "Bucket existente. Pulando bootstrap."
           else
             echo "Bucket não existe. Criando backend..."
@@ -64,7 +59,7 @@ jobs:
         - name: Setup Terraform
           uses: hashicorp/setup-terraform@v3
           with:
-            terraform_version: ${{ env.TF_VERSION }}
+            terraform_version: ${{ vars.TF_VERSION }}
             terraform_wrapper: false
 
         - name: Configure AWS
@@ -72,7 +67,7 @@ jobs:
           with:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ env.AWS_REGION }}
+            aws-region: ${{ vars.AWS_REGION }}
 
         - name: Terraform_fmt
           working-directory: ${{ env.WORK_DIR }}
@@ -106,7 +101,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ env.TF_VERSION }}
+          terraform_version: ${{ vars.TF_VERSION }}
           terraform_wrapper: false
 
       - name: Configure AWS
@@ -114,7 +109,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Terraform_fmt
         working-directory: ${{ env.WORK_DIR }}
@@ -148,7 +143,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ env.TF_VERSION }}
+          terraform_version: ${{ vars.TF_VERSION }}
           terraform_wrapper: false
 
       - name: Configure AWS
@@ -156,7 +151,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Terraform_fmt
         working-directory: ${{ env.WORK_DIR }}

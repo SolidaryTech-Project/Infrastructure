@@ -40,7 +40,7 @@ module "network" {
 module "eks" {
   source = "git::https://github.com/SolidaryTech-Project/Terraform-Modules.git//Modules/eks-cluster?ref=main"
 
-  name       = "${var.project_name}-${var.environment}-cluster"
+  name       = "${var.project_name}-${var.environment}"
   subnet_ids = concat(module.network.public_subnet_ids, module.network.private_subnet_ids)
   tags       = local.tags
 }
