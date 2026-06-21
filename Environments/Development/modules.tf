@@ -140,7 +140,7 @@ module "secrets_manager" {
   secrets = {
     shared-db-url = {
       description = "Shared database connection URL"
-      value       = module.rds_postgres.db_instance_endpoint
+      value       = module.databases.db_instance_endpoint
       service_tag = "shared-db"
     }
     donation-sqs-url = {
