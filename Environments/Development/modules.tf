@@ -138,13 +138,10 @@ module "secrets_manager" {
   oidc_provider_url  = module.eks.oidc_provider_url
 
   secrets = {
-    ngo-db-url = {
-      description = "NGO Service database connection URL"
-      service_tag = "ngo-service"
-    }
-    donation-db-url = {
-      description = "Donation Service database connection URL"
-      service_tag = "donation-service"
+    shared-db-url = {
+      description = "Shared database connection URL"
+      value       = module.rds_postgres.db_instance_endpoint
+      service_tag = "shared-db"
     }
     donation-sqs-url = {
       description = "Donation Service SQS queue URL"
@@ -178,33 +175,26 @@ module "kubernetes" {
   project_name = var.project_name
   environment  = var.environment
 
-  # O módulo possui outputs hard-coded para os namespaces abaixo;
-  # os namespaces do SolidaryTech são adicionados junto.
   namespaces_k8s = toset([
     "ngo-service",
     "donation-service",
     "volunteer-service",
-    "auth-service",
-    "flag-service",
-    "targeting-service",
-    "evaluation-service",
-    "analytics-service",
   ])
 
   external_secrets = {
     ngo-db = {
       namespace     = "ngo-service"
-      aws_key       = "${var.project_name}/${var.environment}/ngo-db-url"
-      target_secret = "ngo-db-credentials"
+      aws_key       = "shared-db-url"
+      target_secret = "shared-db-credentials"
     }
     donation-db = {
       namespace     = "donation-service"
-      aws_key       = "${var.project_name}/${var.environment}/donation-db-url"
-      target_secret = "donation-db-credentials"
+      aws_key       = "shared-db-url"
+      target_secret = "shared-db-credentials"
     }
     donation-sqs = {
       namespace     = "donation-service"
-      aws_key       = "${var.project_name}/${var.environment}/donation-sqs-url"
+      aws_key       = "donation-sqs-url"
       target_secret = "donation-sqs-config"
     }
   }
