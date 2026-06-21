@@ -138,10 +138,15 @@ module "secrets_manager" {
   oidc_provider_url  = module.eks.oidc_provider_url
 
   secrets = {
-    shared-db-url = {
+    ngo-db-url = {
       description = "Shared database connection URL"
       value       = module.databases.rds_instance_endpoint
-      service_tag = ["ngo-service", "donation-service"]
+      service_tag = "ngo-service"
+    }
+    donation-db-url = {
+      description = "Shared database connection URL"
+      value       = module.databases.rds_instance_endpoint
+      service_tag = "donation-service"
     }
     donation-sqs-url = {
       description = "Donation Service SQS queue URL"
