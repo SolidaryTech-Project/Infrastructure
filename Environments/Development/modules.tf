@@ -138,34 +138,35 @@ module "secrets_manager" {
   oidc_provider_url  = module.eks.oidc_provider_url
 
   secrets = {
-    #ngo-db-url = {
-    #  description = "Shared database connection URL"
-    #  value       = module.databases.rds_instance_endpoint
-    #  service_tag = "ngo-service"
-    #}
-    #donation-db-url = {
-    #  description = "Shared database connection URL"
-    #  value       = module.databases.rds_instance_endpoint
-    #  service_tag = "donation-service"
-    #}
     shared-db-url = {
-      description = "Shared database connection URL"
-      value       = module.databases.rds_instance_endpoint
+      description = "Shared database connection credentials"
+      value = {
+        POSTGRES_HOST     = module.databases.rds_instance_address
+        POSTGRES_PORT     = tostring(module.databases.rds_instance_port)
+        POSTGRES_USER     = var.rds_username
+        POSTGRES_PASSWORD = module.databases.rds_password
+      }
       service_tag = "shared"
     }
     donation-sqs-url = {
       description = "Donation Service SQS queue URL"
-      value       = module.donation_queue.sqs_queue_url
+      value = {
+        SQS_QUEUE_URL = module.donation_queue.sqs_queue_url
+      }
       service_tag = "donation-service"
     }
     volunteer-dynamodb-url = {
-      description = "Volunteer Service DynamoDB table URL"
-      value       = module.databases.dynamodb_table_name
+      description = "Volunteer Service DynamoDB table name"
+      value = {
+        DYNAMODB_TABLE = module.databases.dynamodb_table_name
+      }
       service_tag = "volunteer-service"
     }
     region = {
       description = "AWS region"
-      value       = var.aws_region
+      value = {
+        AWS_REGION = var.aws_region
+      }
       service_tag = "shared"
     }
   }
