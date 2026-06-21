@@ -138,15 +138,20 @@ module "secrets_manager" {
   oidc_provider_url  = module.eks.oidc_provider_url
 
   secrets = {
-    ngo-db-url = {
+    #ngo-db-url = {
+    #  description = "Shared database connection URL"
+    #  value       = module.databases.rds_instance_endpoint
+    #  service_tag = "ngo-service"
+    #}
+    #donation-db-url = {
+    #  description = "Shared database connection URL"
+    #  value       = module.databases.rds_instance_endpoint
+    #  service_tag = "donation-service"
+    #}
+    shared-db-url = {
       description = "Shared database connection URL"
       value       = module.databases.rds_instance_endpoint
-      service_tag = "ngo-service"
-    }
-    donation-db-url = {
-      description = "Shared database connection URL"
-      value       = module.databases.rds_instance_endpoint
-      service_tag = "donation-service"
+      service_tag = ["ngo-service", "donation-service"]
     }
     donation-sqs-url = {
       description = "Donation Service SQS queue URL"
@@ -157,6 +162,11 @@ module "secrets_manager" {
       description = "Volunteer Service DynamoDB table URL"
       value       = module.databases.dynamodb_table_name
       service_tag = "volunteer-service"
+    }
+    region = {
+      description = "AWS region"
+      value       = var.aws_region
+      service_tag = ["donation-service", "volunteer-service"]
     }
   }
 
@@ -211,6 +221,16 @@ module "kubernetes" {
       namespace     = "volunteer-service"
       aws_key       = "volunteer-dynamodb-url"
       target_secret = "volunteer-dynamodb-config"
+    }
+    region_volunteer = {
+      namespace     = "volunteer-service"
+      aws_key       = "region"
+      target_secret = "region-config"
+    }
+    region_donation = {
+      namespace     = "donation-service"
+      aws_key       = "region"
+      target_secret = "region-config"
     }
   }
 
