@@ -151,7 +151,7 @@ module "secrets_manager" {
     shared-db-url = {
       description = "Shared database connection URL"
       value       = module.databases.rds_instance_endpoint
-      service_tag = ["ngo-service", "donation-service"]
+      service_tag = "shared"
     }
     donation-sqs-url = {
       description = "Donation Service SQS queue URL"
@@ -166,7 +166,7 @@ module "secrets_manager" {
     region = {
       description = "AWS region"
       value       = var.aws_region
-      service_tag = ["donation-service", "volunteer-service"]
+      service_tag = "shared"
     }
   }
 
